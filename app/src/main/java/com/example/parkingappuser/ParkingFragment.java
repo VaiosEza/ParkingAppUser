@@ -46,6 +46,11 @@ public class ParkingFragment extends Fragment {
         return fragment;
     }
 
+    public static ParkingFragment newInstance() {
+        ParkingFragment fragment = new ParkingFragment();
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

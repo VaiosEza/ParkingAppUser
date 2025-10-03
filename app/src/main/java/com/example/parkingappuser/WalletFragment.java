@@ -46,6 +46,11 @@ public class WalletFragment extends Fragment {
         return fragment;
     }
 
+    public static WalletFragment newInstance() {
+        WalletFragment fragment = new WalletFragment();
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

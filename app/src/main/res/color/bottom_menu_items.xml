@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Όταν πατημένο -->
-    <item android:state_pressed="true" android:drawable="#08628D" />
+    <item android:state_checked="true" android:color="@color/white"/>
 
     <!-- Default κατάσταση -->
-    <item android:drawable="@color/black" />
+    <item android:color="#33A5EC" />
 
 </selector>
