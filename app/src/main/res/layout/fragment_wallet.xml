@@ -3,15 +3,100 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/planet_background_crop"
-    tools:context=".WalletFragment"
-    android:clickable="true">
+    android:background="@drawable/planet2_new"
+    android:clickable="true"
+    tools:context=".WalletFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="wallet fragment"
-        android:textColor="@color/white" />
+        android:orientation="vertical">
 
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp">
+
+            <RadioButton
+                android:id="@+id/ten_euro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radio_group_selector"
+                android:button="@android:color/transparent"
+                android:gravity="center"
+                android:padding="18dp"
+                android:text="10€"
+                android:textColor="@drawable/radio_buttons_text_color_selector"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/twenty_euro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_weight="1"
+                android:background="@drawable/radio_group_selector"
+                android:button="@android:color/transparent"
+                android:gravity="center"
+                android:padding="18dp"
+                android:text="20€"
+                android:textColor="@drawable/radio_buttons_text_color_selector"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/fifty_euro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radio_group_selector"
+                android:button="@android:color/transparent"
+                android:gravity="center"
+                android:padding="18dp"
+                android:text="50€"
+                android:textColor="@drawable/radio_buttons_text_color_selector"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RadioGroup>
+
+
+        <Button
+            android:id="@+id/buttonDebidCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/payment_method_btn_selector"
+            android:padding="16dp"
+            android:text="Debid Card"
+            android:textColor="@drawable/payment_btn_text_color_selector"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="30dp" />
+
+        <Button
+            android:id="@+id/buttonPaySafe_PayPal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/payment_method_btn_selector"
+            android:padding="16dp"
+            android:text="PaySafe / Paypal"
+            android:textColor="@drawable/payment_btn_text_color_selector"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </FrameLayout>

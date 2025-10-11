@@ -56,7 +56,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="@drawable/planet_background_crop">
+        android:background="@drawable/planet1_new">
 
         <!-- ΟΛΑ ΤΑ ΣΤΟΙΧΕΙΑ ΠΟΥ ΚΡΥΒΟΝΤΑΙ ΜΠΗΚΑΝ ΕΔΩ ΜΕΣΑ -->
         <LinearLayout

@@ -1,8 +1,8 @@
 <resources>
-    <string name="Login_URL">http://192.168.2.3/ParkingApp/login2.php</string>
-    <string name="Register_URL">http://192.168.2.3/ParkingApp/register.php</string>
-    <string name="PostLocations_URL">http://192.168.2.3/ParkingApp/postLocation.php</string>
-    <string name="GetLocations_URL">http://192.168.2.3/ParkingApp/getLocations2.php"</string>
-    <string name="UpdateLocations_URL">http://192.168.2.3/ParkingApp/update_location.php</string>
-    <string name="DeleteLocations_URL">http://192.168.2.3/ParkingApp/delete_location.php</string>
+    <string name="Login_URL">http://192.168.2.2/ParkingApp/login2.php</string>
+    <string name="Register_URL">http://192.168.2.2/ParkingApp/register.php</string>
+    <string name="PostLocations_URL">http://192.168.2.2/ParkingApp/postLocation.php</string>
+    <string name="GetLocations_URL">http://192.168.2.2/ParkingApp/getLocations2.php"</string>
+    <string name="UpdateLocations_URL">http://192.168.2.2/ParkingApp/update_location.php</string>
+    <string name="DeleteLocations_URL">http://192.168.2.2/ParkingApp/delete_location.php</string>
 </resources>
