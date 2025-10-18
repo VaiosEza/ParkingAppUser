@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,24 +8,26 @@
     android:clickable="true"
     tools:context=".WalletFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
 
         <RadioGroup
             android:id="@+id/radio_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:orientation="horizontal"
-            android:layout_marginTop="25dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp">
+            app:layout_constraintBottom_toTopOf="@+id/payment_methods"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <RadioButton
                 android:id="@+id/ten_euro"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/radio_group_selector"
@@ -38,10 +41,9 @@
 
             <RadioButton
                 android:id="@+id/twenty_euro"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:layout_marginRight="25dp"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
                 android:background="@drawable/radio_group_selector"
                 android:button="@android:color/transparent"
@@ -54,8 +56,9 @@
 
             <RadioButton
                 android:id="@+id/fifty_euro"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
                 android:background="@drawable/radio_group_selector"
                 android:button="@android:color/transparent"
@@ -67,36 +70,48 @@
                 android:textStyle="bold" />
         </RadioGroup>
 
-
-        <Button
-            android:id="@+id/buttonDebidCard"
+        <LinearLayout
+            android:id="@+id/payment_methods"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="70dp"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/payment_method_btn_selector"
-            android:padding="16dp"
-            android:text="Debid Card"
-            android:textColor="@drawable/payment_btn_text_color_selector"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radio_group">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="30dp" />
+            <Button
+                android:id="@+id/buttonDebidCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/payment_method_btn_selector"
+                android:padding="16dp"
+                android:text="Debid Card"
+                android:textColor="@drawable/payment_btn_text_color_selector"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/buttonPaySafe_PayPal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/payment_method_btn_selector"
-            android:padding="16dp"
-            android:text="PaySafe / Paypal"
-            android:textColor="@drawable/payment_btn_text_color_selector"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="24dp"></Space>
+
+            <Button
+                android:id="@+id/buttonPaySafe_PayPal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/payment_method_btn_selector"
+                android:padding="16dp"
+                android:text="PaySafe / Paypal"
+                android:textColor="@drawable/payment_btn_text_color_selector"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
