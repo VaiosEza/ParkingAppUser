@@ -1,5 +1,7 @@
 package com.example.parkingappuser;
 
+import static com.google.android.material.internal.ContextUtils.getActivity;
+
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -9,6 +11,7 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,25 +19,37 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap gMap;
     private SearchView mapSearch;
-    private double latitude;
-    private double longitude;
-    private String roadName;
-    private String roadNum;
     private Geocoder geocoder;
+    private ArrayList <MapLocations> locations = new ArrayList<>();
+
+    private double cost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        RetrieveData locObj = new RetrieveData();
+
+
+        try {
+            locations  = locObj.getLocations(getResources().getString(R.string.GetLocations_URL));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
 
         SupportMapFragment mapFragment =  SupportMapFragment.newInstance();
@@ -65,7 +80,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     Address address = addressList.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    updateMapWithLocation(latLng);
+//                    updateMapWithLocation(latLng);
 
                 } catch (IOException e) {
                     Toast.makeText(MapActivity.this, "Σφάλμα σύνδεσης!", Toast.LENGTH_SHORT).show();
@@ -87,62 +102,44 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
+
         gMap = googleMap;
+        addLocations();
         LatLng greece = new LatLng( 39.4545, 22.6158);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(greece, 6));
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
 
-                updateMapWithLocation(latLng);
+                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
 
             }
         });
-    }
 
-    private void updateMapWithLocation(LatLng latLng) {
-        latitude = latLng.latitude;
-        longitude = latLng.longitude;
+        gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull Marker marker) {
 
-        gMap.clear();
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+                // Θα παίρνουμε τις πληροφορίες που έχουμε ορίσει στο marker και θα εμφανίζουμε
+                // ένα dialog. Επίσης το κόστος , τις ημέρες και ώρες που δεν υπάρχει χρέωση
+                //  πρέπει να τα μεταφέρουμε στο parking fragment (μάλλον με intent) ώστε όταν
+                // να υπολογίσουμε το ανάλογο κόστος.
 
-        try {
-            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            if (!addresses.isEmpty()) {
-                Address address = addresses.get(0);
-
-                if (address.getThoroughfare() != null){
-                    roadName = address.getThoroughfare(); //όνομα οδού / δρόμου κλπ.
-                    roadNum = address.getSubThoroughfare(); //αριθμός οδού
-                }
-                else{
-                    roadName ="Unknown";
-                    roadNum = "";
-                }
-
-
-                    markerOptions.title(roadName+" "+roadNum);
-
+                return false;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-        gMap.addMarker(markerOptions);
+        });
     }
 
+    private void addLocations(){
+        for(int i=0 ; i<locations.size();i++){
+            gMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(locations.get(i).getLatitude(), locations.get(i).getLongitude()))
+                    .title(locations.get(i).getLocName()));
+        }
+    }
 
     public void backBtn(View view){
-
-//        Intent intent = new Intent(this, PostLoc.class);
-//        intent.putExtra("latitude", latitude);
-//        intent.putExtra("longitude", longitude);
-//        intent.putExtra("roadName", roadName);
-//        intent.putExtra("roadNum", roadNum);
-//        setResult(RESULT_OK, intent);
         finish();
 
    }
