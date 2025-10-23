@@ -35,7 +35,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private Geocoder geocoder;
     private ArrayList <MapLocations> locations = new ArrayList<>();
 
-    private double cost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,10 +120,34 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
 
-                // Θα παίρνουμε τις πληροφορίες που έχουμε ορίσει στο marker και θα εμφανίζουμε
-                // ένα dialog. Επίσης το κόστος , τις ημέρες και ώρες που δεν υπάρχει χρέωση
-                //  πρέπει να τα μεταφέρουμε στο parking fragment (μάλλον με intent) ώστε όταν
-                // να υπολογίσουμε το ανάλογο κόστος.
+                MapLocations markerTag = (MapLocations) marker.getTag();
+
+                String freeTime = "-";
+                if (!markerTag.getStartBill().equals("null")){
+                    freeTime =  markerTag.getStartBill()+" - "+markerTag.getStopBill();
+                }
+
+                new AlertDialog.Builder(MapActivity.this)
+                        .setTitle(marker.getTitle())
+                        .setMessage("Cost per hour: " + markerTag.getCost() + "€\n" +
+                                "Parking Slots: " + markerTag.getSlots()+"\n" +
+                                "Free time: "+freeTime+"\n" +
+                                "Free days: "+markerTag.getWeekDays())
+                        .setPositiveButton("Start Parking", (dialog, which) -> {
+
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("locationName", markerTag.getLocName());
+                            resultIntent.putExtra("costPerHour", markerTag.getCost());
+                            resultIntent.putExtra("freeStartTime",markerTag.getStartBill() );
+                            resultIntent.putExtra("freeStopTime",markerTag.getStopBill() );
+                            resultIntent.putExtra("freeDays",markerTag.getWeekDays() );
+
+                            // ... πρόσθεσε ό,τι άλλο χρειάζεσαι ...
+                            setResult(RESULT_OK, resultIntent);
+                            finish(); // Κλείσε το MapActivity
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
 
                 return false;
             }
@@ -133,9 +156,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void addLocations(){
         for(int i=0 ; i<locations.size();i++){
-            gMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(locations.get(i).getLatitude(), locations.get(i).getLongitude()))
-                    .title(locations.get(i).getLocName()));
+            MapLocations currentLocation = locations.get(i);
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
+                    .title(currentLocation.getLocName());
+
+            // Προσθέτουμε το marker στον χάρτη
+            Marker marker = gMap.addMarker(markerOptions);
+            marker.setTag(currentLocation);
+
+
         }
     }
 
