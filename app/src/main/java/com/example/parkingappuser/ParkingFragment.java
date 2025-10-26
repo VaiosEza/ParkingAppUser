@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -17,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,7 +37,17 @@ public class ParkingFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private double cost;
+    private CustomNumberPicker hoursPicker;
+    private CustomNumberPicker minutesPicker;
+
+    String [] minuteArray;
+
+    private TextView costView;
+
+    private double totalCost;
+    private double costPerHour;
+    private double hours;
+    private double minutes;
 
     private ActivityResultLauncher<Intent> mapLauncher;
 
@@ -68,26 +81,46 @@ public class ParkingFragment extends Fragment {
 
     public void onViewCreated(View view , Bundle savedInstanceState) {
         super.onViewCreated(view , savedInstanceState);
-        CustomNumberPicker hours = view.findViewById(R.id.hourPicker);
-        CustomNumberPicker minutes = view.findViewById(R.id.minutePicker);
-
-        String [] minuteArray  = new String[]{"0", "15", "30", "45"};
-
-        hours.setMinValue(1);
-        hours.setMaxValue(4);
-        minutes.setMinValue(0);
-        minutes.setMaxValue(minuteArray.length - 1);
-        minutes.setDisplayedValues(minuteArray);
-
+        hoursPicker = view.findViewById(R.id.hourPicker);
+        minutesPicker = view.findViewById(R.id.minutePicker);
         Button showMap = view.findViewById(R.id.chooseLocBtn);
-        TextView costView = view.findViewById(R.id.textViewCost);
+        costView = view.findViewById(R.id.textViewCost);
+
+        minuteArray   = new String[]{"0", "15", "30", "45"};
+
+        hoursPicker.setMinValue(1);
+        hoursPicker.setMaxValue(4);
+        minutesPicker.setMinValue(0);
+        minutesPicker.setMaxValue(minuteArray.length - 1);
+        minutesPicker.setDisplayedValues(minuteArray);
+
+
 
         mapLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+                    if (result.getResultCode() == AppCompatActivity.RESULT_OK && result.getData() != null) {
+                        // Το αποτέλεσμα είναι ΟΚ και περιέχει δεδομένα
+                        Intent data = result.getData();
+
+                        // Παίρνουμε τις τιμές χρησιμοποιώντας τα ΙΔΙΑ ακριβώς κλειδιά
+                        String locationName = data.getStringExtra("locationName");
+                        costPerHour = data.getDoubleExtra("costPerHour", 0.0); // 0.0 είναι η default τιμή
+                        String freeStartTime = data.getStringExtra("freeStartTime");
+                        String freeStopTime = data.getStringExtra("freeStopTime");
+                        String freeDays = data.getStringExtra("freeDays");
+                        updateCost();
+                    }
 
                 }
         );
+
+        hoursPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateCost());
+        minutesPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateCost());
+
+        updateCost();
+
+
 //        costView.setText("Cost: "+cost);
         showMap.setOnClickListener(v -> showMap());
 
@@ -98,6 +131,28 @@ public class ParkingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_parking, container, false);
+    }
+
+    private void updateCost() {
+        // Αν δεν έχει επιλεγεί ακόμα τοποθεσία, το κόστος είναι 0
+        if (costPerHour == 0.0) {
+            costView.setText("Cost: 0.00€");
+            return;
+        }
+
+        int selectedHours = hoursPicker.getValue();
+        int selectedMinuteIndex = minutesPicker.getValue();
+
+        // Βρίσκουμε την πραγματική τιμή των λεπτών
+        int actualMinutes = Integer.parseInt(minuteArray[selectedMinuteIndex]);
+
+        // Κάνουμε τον σωστό αναλογικό υπολογισμό
+        double fractionalHours = actualMinutes / 60.0;
+        double totalHours = selectedHours + fractionalHours;
+        double totalCost = totalHours * costPerHour;
+
+        // Εμφανίζουμε το αποτέλεσμα με μορφοποίηση 2 δεκαδικών
+        costView.setText(String.format(Locale.US, "Cost: %.2f€", totalCost));
     }
 
     public void showMap(){

@@ -1,13 +1,13 @@
 package com.example.parkingappuser;
 
-import static com.google.android.material.internal.ContextUtils.getActivity;
-
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -124,32 +123,51 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                 String freeTime = "-";
                 if (!markerTag.getStartBill().equals("null")){
-                    freeTime =  markerTag.getStartBill()+" - "+markerTag.getStopBill();
+                    freeTime =  markerTag.getStartBill().substring(0,5)+" - "+markerTag.getStopBill().substring(0,5);
                 }
 
-                new AlertDialog.Builder(MapActivity.this)
-                        .setTitle(marker.getTitle())
-                        .setMessage("Cost per hour: " + markerTag.getCost() + "€\n" +
-                                "Parking Slots: " + markerTag.getSlots()+"\n" +
-                                "Free time: "+freeTime+"\n" +
-                                "Free days: "+markerTag.getWeekDays())
-                        .setPositiveButton("Start Parking", (dialog, which) -> {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MapActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.location_details_dialog,null);
+                TextView title = mView.findViewById(R.id.textViewDialogTitle);
+                TextView costPerHourView = mView.findViewById(R.id.textViewCostPerHour);
+                TextView parkingSlotsView = mView.findViewById(R.id.textViewParkingSlots);
+                TextView freeTimeView = mView.findViewById(R.id.textViewFreeTime);
+                TextView freeDaysView = mView.findViewById(R.id.textViewFreeDays);
+                Button cancel = mView.findViewById(R.id.buttonCancel);
+                Button select = mView.findViewById(R.id.buttonChooseLocation);
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
 
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("locationName", markerTag.getLocName());
-                            resultIntent.putExtra("costPerHour", markerTag.getCost());
-                            resultIntent.putExtra("freeStartTime",markerTag.getStartBill() );
-                            resultIntent.putExtra("freeStopTime",markerTag.getStopBill() );
-                            resultIntent.putExtra("freeDays",markerTag.getWeekDays() );
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
 
-                            // ... πρόσθεσε ό,τι άλλο χρειάζεσαι ...
-                            setResult(RESULT_OK, resultIntent);
-                            finish(); // Κλείσε το MapActivity
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+                select.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("locationName", markerTag.getLocName());
+                        resultIntent.putExtra("costPerHour", markerTag.getCost());
+                        resultIntent.putExtra("freeStartTime",markerTag.getStartBill() );
+                        resultIntent.putExtra("freeStopTime",markerTag.getStopBill() );
+                        resultIntent.putExtra("freeDays",markerTag.getWeekDays() );
+                        setResult(RESULT_OK, resultIntent);
+                        dialog.dismiss();
+                        finish();
+                    }
+                });
 
-                return false;
+                title.setText(marker.getTitle());
+                costPerHourView.setText("Cost per hour: " + markerTag.getCost()+"€");
+                parkingSlotsView.setText("Parking Slots: " + markerTag.getSlots());
+                freeTimeView.setText("Free time: "+freeTime);
+                freeDaysView.setText("Free days: "+markerTag.getWeekDays());
+
+                dialog.show();
+                return true;
             }
         });
     }
