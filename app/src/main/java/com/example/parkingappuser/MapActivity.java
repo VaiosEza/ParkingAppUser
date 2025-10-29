@@ -78,7 +78,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     Address address = addressList.get(0);
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-//                    updateMapWithLocation(latLng);
+                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
                 } catch (IOException e) {
                     Toast.makeText(MapActivity.this, "Σφάλμα σύνδεσης!", Toast.LENGTH_SHORT).show();
@@ -103,14 +103,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         gMap = googleMap;
         addLocations();
-        LatLng greece = new LatLng( 39.4545, 22.6158);
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(greece, 6));
+        LatLng greece = new LatLng( locations.get(0).getLatitude(), locations.get(0).getLongitude());
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(greece, 15));
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
 
                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
 
             }
         });
@@ -120,6 +119,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public boolean onMarkerClick(@NonNull Marker marker) {
 
                 MapLocations markerTag = (MapLocations) marker.getTag();
+                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
 
                 String freeTime = "-";
                 if (!markerTag.getStartBill().equals("null")){

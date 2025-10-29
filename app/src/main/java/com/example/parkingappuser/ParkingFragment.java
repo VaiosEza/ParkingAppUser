@@ -4,10 +4,12 @@ import static android.app.Activity.RESULT_OK;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -19,6 +21,13 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import java.sql.Time;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Locale;
 
 /**
@@ -46,6 +55,7 @@ public class ParkingFragment extends Fragment {
 
     private double totalCost;
     private double costPerHour;
+    private String locationName , freeStartTime , freeStopTime , freeDays;
     private double hours;
     private double minutes;
 
@@ -84,6 +94,7 @@ public class ParkingFragment extends Fragment {
         hoursPicker = view.findViewById(R.id.hourPicker);
         minutesPicker = view.findViewById(R.id.minutePicker);
         Button showMap = view.findViewById(R.id.chooseLocBtn);
+        Button startParking = view.findViewById(R.id.start_parking_button);
         costView = view.findViewById(R.id.textViewCost);
 
         minuteArray   = new String[]{"0", "15", "30", "45"};
@@ -99,16 +110,20 @@ public class ParkingFragment extends Fragment {
         mapLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == AppCompatActivity.RESULT_OK && result.getData() != null) {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         // Το αποτέλεσμα είναι ΟΚ και περιέχει δεδομένα
                         Intent data = result.getData();
 
                         // Παίρνουμε τις τιμές χρησιμοποιώντας τα ΙΔΙΑ ακριβώς κλειδιά
-                        String locationName = data.getStringExtra("locationName");
+                        locationName = data.getStringExtra("locationName");
                         costPerHour = data.getDoubleExtra("costPerHour", 0.0); // 0.0 είναι η default τιμή
-                        String freeStartTime = data.getStringExtra("freeStartTime");
-                        String freeStopTime = data.getStringExtra("freeStopTime");
-                        String freeDays = data.getStringExtra("freeDays");
+                        freeStartTime = data.getStringExtra("freeStartTime");
+                        freeStopTime = data.getStringExtra("freeStopTime");
+                        freeDays = data.getStringExtra("freeDays");
+
+                        checkDateAndTime(startParking);
+
+
                         updateCost();
                     }
 
@@ -153,6 +168,40 @@ public class ParkingFragment extends Fragment {
 
         // Εμφανίζουμε το αποτέλεσμα με μορφοποίηση 2 δεκαδικών
         costView.setText(String.format(Locale.US, "Cost: %.2f€", totalCost));
+    }
+
+
+    private void checkDateAndTime(Button button) {
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            if (freeDays.toLowerCase().contains(LocalDate.now().getDayOfWeek().toString().toLowerCase())) {
+                button.setEnabled(false);
+                button.setText("Free parking on " + LocalDate.now().getDayOfWeek().toString().toLowerCase());
+            }
+            else if (!freeStartTime.equals("null")) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                LocalTime startTime = LocalTime.parse(freeStartTime, formatter);
+                LocalTime endTime = LocalTime.parse(freeStopTime, formatter);
+                LocalTime currentTime = LocalTime.now();
+
+                if (currentTime.isAfter(startTime) && currentTime.isBefore(endTime)) {
+                    button.setEnabled(false);
+                    button.setText("Free parking until " + endTime);
+
+                }
+                else {
+                    button.setEnabled(true);
+                    button.setText("Start parking");
+                    }
+            }
+            else {
+                button.setEnabled(true);
+                button.setText("Start parking");
+            }
+
+
+        }
     }
 
     public void showMap(){
