@@ -1,9 +1,13 @@
 package com.example.parkingappuser;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
@@ -18,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -160,7 +165,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
                 });
 
-                title.setText(marker.getTitle());
+                title.setText(markerTag.getLocName());
                 costPerHourView.setText("Cost per hour: " + markerTag.getCost()+"€");
                 parkingSlotsView.setText("Parking Slots: " + markerTag.getSlots());
                 freeTimeView.setText("Free time: "+freeTime);
@@ -176,16 +181,37 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         for(int i=0 ; i<locations.size();i++){
             MapLocations currentLocation = locations.get(i);
 
+            //Δημιουργούμε το προσαρμοσμένο εικονίδιο που περιέχει το όνομα
+            Bitmap customMarkerBitmap = createCustomMarkerBitmap(this, currentLocation.getLocName());
+
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
-                    .title(currentLocation.getLocName());
+                    .icon(BitmapDescriptorFactory.fromBitmap(customMarkerBitmap))
+                    .anchor(0.5f, 1.0f);
 
-            // Προσθέτουμε το marker στον χάρτη
             Marker marker = gMap.addMarker(markerOptions);
             marker.setTag(currentLocation);
 
 
         }
+    }
+
+
+    private Bitmap createCustomMarkerBitmap(Context context, String title) {
+        View markerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                .inflate(R.layout.custom_marker_layout, null);
+
+        TextView titleTextView = markerView.findViewById(R.id.marker_title);
+        titleTextView.setText(title);
+
+        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(), markerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        markerView.draw(canvas);
+
+        return bitmap;
     }
 
     public void backBtn(View view){

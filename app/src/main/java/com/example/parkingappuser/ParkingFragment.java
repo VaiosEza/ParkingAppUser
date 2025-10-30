@@ -2,7 +2,10 @@ package com.example.parkingappuser;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -200,9 +203,9 @@ public class ParkingFragment extends Fragment {
                 button.setText("Start parking");
             }
 
-
         }
     }
+
 
     public void showMap(){
         Intent intent = new Intent(getActivity(), MapActivity.class);
