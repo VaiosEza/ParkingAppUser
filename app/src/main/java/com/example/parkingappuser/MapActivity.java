@@ -35,8 +35,6 @@ import java.util.Locale;
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap gMap;
-    private SearchView mapSearch;
-    private Geocoder geocoder;
     private ArrayList <MapLocations> locations = new ArrayList<>();
 
     @Override
@@ -53,8 +51,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             throw new RuntimeException(e);
         }
 
-
-
         SupportMapFragment mapFragment =  SupportMapFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.google_map, mapFragment)
@@ -62,44 +58,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         mapFragment.getMapAsync(this);
 
-        mapSearch = findViewById(R.id.mapSearchView);
-        geocoder = new Geocoder(this, new Locale("el", "GR"));
-        mapSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if (query == null || query.trim().isEmpty()) {
-                    return false;
-                }
-
-                List<Address> addressList;
-                try {
-                    addressList = geocoder.getFromLocationName(query, 1);
-
-                    if (addressList == null || addressList.isEmpty()) {
-                        Toast.makeText(MapActivity.this, "Η τοποθεσία δεν βρέθηκε.", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-
-                    Address address = addressList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
-                } catch (IOException e) {
-                    Toast.makeText(MapActivity.this, "Σφάλμα σύνδεσης!", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    Toast.makeText(MapActivity.this, "Άγνωστο σφάλμα κατά την αναζήτηση!", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
     }
 
 
