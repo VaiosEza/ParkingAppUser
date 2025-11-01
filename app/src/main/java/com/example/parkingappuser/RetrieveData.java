@@ -27,6 +27,7 @@ public class RetrieveData {
         String name = "";
         int admin_rights = -1;
         String status = "";
+        double balance = 0.00;
 
         OkHttpClient client = new OkHttpClient();
 
@@ -52,13 +53,14 @@ public class RetrieveData {
                 JSONObject userData = json.getJSONObject("data");
                 name = userData.getString("name");
                 admin_rights = userData.getInt("admin_rights");
+                balance = userData.getDouble("balance");
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return new User(name, email, password, admin_rights, status);
+        return new User(name, email, password, admin_rights, balance, status);
     }
 
 
