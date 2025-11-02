@@ -5,4 +5,6 @@
     <string name="GetLocations_URL">http://192.168.2.3/ParkingApp/getLocations2.php"</string>
     <string name="UpdateLocations_URL">http://192.168.2.3/ParkingApp/update_location.php</string>
     <string name="DeleteLocations_URL">http://192.168.2.3/ParkingApp/delete_location.php</string>
+    <string name="CreatePaymentIntent_URL">http://192.168.2.3/ParkingApp/create_payment_intent.php</string>
+    <string name="UpdateBalance_URL">http://192.168.2.3/ParkingApp/update_balance.php</string>
 </resources>

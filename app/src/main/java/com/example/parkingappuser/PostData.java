@@ -59,47 +59,6 @@ public class PostData {
         return data +"#"+ status;
     }
 
-    public Double updateUserBalance(String url, String email, double amountPaid) throws Exception {
-        OkHttpClient client = new OkHttpClient();
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("amount_paid", amountPaid);
-            jsonBody.put("user_email", email);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null; // Αποτυχία δημιουργίας JSON
-        }
-
-        MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        RequestBody body = RequestBody.create(jsonBody.toString(), JSON);
-
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-
-        Response response = client.newCall(request).execute();
-        String data = response.body().string();
-
-        try {
-            JSONObject jsonResponse = new JSONObject(data);
-            String status = jsonResponse.getString("status");
-
-            if (status.equals("success")) {
-                // Αν είναι επιτυχής, διάβασε και επίστρεψε το "newBalance"
-                return jsonResponse.getDouble("newBalance");
-            } else {
-                // Αν ο server απάντησε με status "error"
-                return null;
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            // Αν η απάντηση δεν είναι το αναμενόμενο JSON, απέτυχε
-            return null;
-        }
-    }
 
 
 }

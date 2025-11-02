@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.stripe.android.PaymentConfiguration;
 
 
 public class UserActivity extends AppCompatActivity {
@@ -14,6 +15,11 @@ public class UserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+
+        PaymentConfiguration.init(
+                getApplicationContext(),
+                getString(R.string.Stripe_Public_Key)
+        );
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
