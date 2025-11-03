@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
             if (user.geStatus().equals("Success")) {
 
                     intent = new Intent(LoginActivity.this, UserActivity.class);
-                    intent.putExtra("user", user);
+                    intent.putExtra("userObject", user);
 
                 startActivity(intent);
                 finish();

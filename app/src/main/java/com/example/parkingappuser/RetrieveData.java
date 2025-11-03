@@ -25,7 +25,6 @@ public class RetrieveData {
 
     User getUserDetails (String url , String email , String password) throws Exception {
         String name = "";
-        int admin_rights = -1;
         String status = "";
         double balance = 0.00;
 
@@ -43,7 +42,7 @@ public class RetrieveData {
 
         Response response = client.newCall(request).execute();
         String data = response.body().string();
-        //System.out.println("My Response: " + data);
+        System.out.println("My Response: " + data);
 
         try {
             JSONObject json = new JSONObject(data);
@@ -52,7 +51,6 @@ public class RetrieveData {
             if (status.equals("Success")) {
                 JSONObject userData = json.getJSONObject("data");
                 name = userData.getString("name");
-                admin_rights = userData.getInt("admin_rights");
                 balance = userData.getDouble("balance");
             }
 
@@ -60,7 +58,7 @@ public class RetrieveData {
             e.printStackTrace();
         }
 
-        return new User(name, email, password, admin_rights, balance, status);
+        return new User(name, email, password,  balance, status);
     }
 
 

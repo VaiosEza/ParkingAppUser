@@ -1,5 +1,6 @@
 package com.example.parkingappuser;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,30 +21,46 @@ import com.stripe.android.paymentsheet.PaymentSheetResult;
 
 public class WalletFragment extends Fragment {
 
+    private static  String ARG_EMAIL = "emailArg";
+    private static  String ARG_BALANCE = "balanceArg";
     private PaymentSheet paymentSheet;
     private String paymentIntentClientSecret;
-
-    // UI Elements
     private RadioGroup radioGroup;
     private Button buttonDebitCard;
     private Button buttonPaySafePayPal;
     private Integer selectedAmount = null; // Το επιλεγμένο ποσό σε ΣΕΝΤΣ
 
-    // Αυτό πρέπει να το πάρεις από την Activity/SharedPreferences κτλ.
-    // Είναι το email του συνδεδεμένου χρήστη.
-    private String currentUserEmail = "user1@gmail.com"; // <<-- ΠΑΡΑΔΕΙΓΜΑ! ΑΛΛΑΞΕ ΤΟ
+    private String userEmail;
+    private Double userBalance;
+
+    // 1. ΔΗΛΩΣΗ ΤΟΥ "ΣΥΜΒΟΛΑΙΟΥ" (INTERFACE)
+    public interface OnBalanceUpdateListener {
+        void onBalanceUpdated(double newBalance);
+    }
+
+    // 2. ΔΗΜΙΟΥΡΓΙΑ ΜΙΑΣ ΜΕΤΑΒΛΗΤΗΣ ΓΙΑ ΤΟΝ "ΑΚΡΟΑΤΗ" (LISTENER)
+    private OnBalanceUpdateListener balanceUpdatelistener;
 
     public WalletFragment() {
         // Required empty public constructor
     }
 
-    public static WalletFragment newInstance() {
-        return new WalletFragment();
+    public static WalletFragment newInstance(String email , double balance) {
+        WalletFragment fragment = new WalletFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_EMAIL, email);
+        args.putDouble(ARG_BALANCE, balance);
+        fragment.setArguments(args);
+
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        userEmail = getArguments().getString(ARG_EMAIL, null);
+        userBalance = getArguments().getDouble(ARG_BALANCE,0.0);
 
         // Αρχικοποίηση του PaymentSheet. Γίνεται μία φορά.
         paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);
@@ -84,16 +101,17 @@ public class WalletFragment extends Fragment {
             setPaymentButtonsEnabled(selectedAmount != null);
         });
 
-        // 4. Προσθήκη listener στο κουμπί πληρωμής
-        View.OnClickListener paymentClickListener = v -> {
-            if (selectedAmount != null) {
-                setPaymentButtonsEnabled(false); // Απενεργοποίησε τα κουμπιά για να μην πατηθούν ξανά
-                fetchPaymentIntent();
-            }
-        };
 
-        buttonDebitCard.setOnClickListener(paymentClickListener);
-        buttonPaySafePayPal.setOnClickListener(paymentClickListener); // Το ίδιο sheet χειρίζεται όλες τις μεθόδους
+        buttonDebitCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedAmount != null) {
+                    setPaymentButtonsEnabled(false); // Απενεργοποίησε τα κουμπιά για να μην πατηθούν ξανά
+                    fetchPaymentIntent();
+                }
+            }
+        });
+//        buttonPaySafePayPal.setOnClickListener();
     }
 
     private void fetchPaymentIntent() {
@@ -103,10 +121,10 @@ public class WalletFragment extends Fragment {
             try {
                 // Υποθέτουμε ότι έχεις μια κλάση ApiHelper με τη μέθοδο createPaymentIntent
                 ApiHelper apiHelper = new ApiHelper();
-                String url = getString(R.string.CreatePaymentIntent_URL);
+                String url = getString(R.string.CreateCardIntent_URL);
 
                 // Η μέθοδος επιστρέφει το clientSecret ή null αν αποτύχει
-                paymentIntentClientSecret = apiHelper.createPaymentIntent(url, currentUserEmail, selectedAmount);
+                paymentIntentClientSecret = apiHelper.createPaymentIntent(url, userEmail, selectedAmount);
 
                 // Η ενημέρωση του UI πρέπει να γίνει στον main thread
                 if (getActivity() != null) {
@@ -162,12 +180,13 @@ public class WalletFragment extends Fragment {
                 String url = getString(R.string.UpdateBalance_URL);
 
                 // Η μέθοδος επιστρέφει το νέο υπόλοιπο ή null
-                Double newBalance = apiHelper.updateUserBalance(url, currentUserEmail, amountInEuros);
+                userBalance = apiHelper.updateUserBalance(url, userEmail, amountInEuros);
 
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        if (newBalance != null) {
-                            Toast.makeText(getContext(), "Το υπόλοιπο ενημερώθηκε: "+newBalance, Toast.LENGTH_LONG).show();
+                        if (userBalance != null) {
+                            balanceUpdatelistener.onBalanceUpdated(userBalance);
+                            Toast.makeText(getContext(), "Το υπόλοιπο ενημερώθηκε: "+userBalance, Toast.LENGTH_LONG).show();
                             // Ενημέρωσε το TextView με το νέο υπόλοιπο
 //                            tvCurrentBalance.setText(String.format("Υπόλοιπο: %.2f€", newBalance));
                         } else {
@@ -188,5 +207,18 @@ public class WalletFragment extends Fragment {
     private void setPaymentButtonsEnabled(boolean isEnabled) {
         buttonDebitCard.setEnabled(isEnabled);
         buttonPaySafePayPal.setEnabled(isEnabled);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // 3. ΕΛΕΓΧΟΣ ΚΑΙ ΑΝΑΘΕΣΗ ΤΟΥ LISTENER
+        if (context instanceof OnBalanceUpdateListener) {
+            balanceUpdatelistener = (OnBalanceUpdateListener) context;
+        } else {
+            // Αν η Activity δεν υλοποιεί το interface, "πέτα" ένα σφάλμα για να σε προειδοποιήσει
+            throw new RuntimeException(context.toString()
+                    + " must implement OnBalanceUpdateListener");
+        }
     }
 }

@@ -1,6 +1,9 @@
 package com.example.parkingappuser;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -8,18 +11,29 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.stripe.android.PaymentConfiguration;
 
 
-public class UserActivity extends AppCompatActivity {
+public class UserActivity extends AppCompatActivity implements WalletFragment.OnBalanceUpdateListener {
     private int lastSelectedItemId = R.id.userPage;
+    private TextView balanceView;
+    private double balance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
 
+        Intent intent = getIntent();
+        User user = (User) intent.getSerializableExtra("userObject");
         PaymentConfiguration.init(
                 getApplicationContext(),
                 getString(R.string.Stripe_Public_Key)
         );
+
+        TextView usernameView = findViewById(R.id.textViewUsername);
+        usernameView.setText(user.getName());
+
+        balance = user.getBalance();
+        balanceView = findViewById(R.id.textViewBalance);
+        balanceView.setText(String.valueOf(balance));
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
@@ -38,9 +52,9 @@ public class UserActivity extends AppCompatActivity {
                 showActivityContent();
             } else {
                 if (newSelectedItemId == R.id.walletPage) {
-                    showFragment(WalletFragment.newInstance(), isGoingForward);
+                    showFragment(WalletFragment.newInstance(user.getEmail(),balance), isGoingForward);
                 } else if (newSelectedItemId == R.id.parkingPage) {
-                    showFragment(ParkingFragment.newInstance(), isGoingForward);
+                    showFragment(ParkingFragment.newInstance(user.getEmail(),balance), isGoingForward);
                 }
             }
             lastSelectedItemId = newSelectedItemId;
@@ -77,5 +91,11 @@ public class UserActivity extends AppCompatActivity {
             transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right).remove(oldFragment).commit();
 
         }
+    }
+
+    @Override
+    public void onBalanceUpdated(double newBalance) {
+        balanceView.setText(String.valueOf(newBalance));
+        balance = newBalance;
     }
 }
