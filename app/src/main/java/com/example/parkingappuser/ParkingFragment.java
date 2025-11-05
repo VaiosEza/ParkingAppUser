@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -104,18 +105,18 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         minutesPicker.setMaxValue(minuteArray.length - 1);
         minutesPicker.setDisplayedValues(minuteArray);
 
+        startParking.setEnabled(false);
+
 
 
         mapLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        // Το αποτέλεσμα είναι ΟΚ και περιέχει δεδομένα
                         Intent data = result.getData();
 
-                        // Παίρνουμε τις τιμές χρησιμοποιώντας τα ΙΔΙΑ ακριβώς κλειδιά
                         locationName = data.getStringExtra("locationName");
-                        costPerHour = data.getDoubleExtra("costPerHour", 0.0); // 0.0 είναι η default τιμή
+                        costPerHour = data.getDoubleExtra("costPerHour", 0.0);
                         freeStartTime = data.getStringExtra("freeStartTime");
                         freeStopTime = data.getStringExtra("freeStopTime");
                         freeDays = data.getStringExtra("freeDays");
@@ -123,7 +124,11 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
                         checkDateAndTime(startParking);
 
 
-                        updateCost();
+                        if (costPerHour > 0){
+                            startParking.setEnabled(true);
+                            updateCost();
+                        }
+
                     }
 
                 }
@@ -134,14 +139,23 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
 
         updateCost();
 
-
-//        costView.setText("Cost: "+cost);
         showMap.setOnClickListener(v -> showMap());
         startParking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Time in ms = "+timeInMs);
-                timer.start();
+                if (userBalance >= totalCost) {
+                    if (startParking.getText().toString().equals(getString(R.string.start_parking))) {
+                        timer.start();
+                        startParking.setText(getString(R.string.stop_parking));
+                    } else {
+                        timer.onFinish();
+                        startParking.setText(getString(R.string.start_parking));
+                    }
+                }
+                else{
+                    Toast.makeText(getContext(), "Ανεπαρκές ποσό πληρωμής!", Toast.LENGTH_SHORT).show();
+                }
+//                System.out.println("Time in ms = "+timeInMs);
 
             }
         });
@@ -157,11 +171,6 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     }
 
     private void updateCost() {
-        // Αν δεν έχει επιλεγεί ακόμα τοποθεσία, το κόστος είναι 0
-//        if (costPerHour == 0.0) {
-//            costView.setText("Cost: 0.00€");
-//            return;
-//        }
 
         selectedHours = hoursPicker.getValue();
         int selectedMinuteIndex = minutesPicker.getValue();
@@ -188,6 +197,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
             }
             // When the task is over it will print 00:00:00 there
             public void onFinish() {
+                timer.cancel();
                 timerView.setText("Timer: 00:00:00");
             }
         };
@@ -239,6 +249,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     public void showMap(){
         Intent intent = new Intent(getActivity(), MapActivity.class);
         mapLauncher.launch(intent);
+
 
     }
 

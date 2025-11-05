@@ -134,7 +134,7 @@
             android:layout_marginEnd="20dp"
             android:background="@drawable/payment_method_btn_selector"
             android:padding="16dp"
-            android:text="Start Parking"
+            android:text="@string/start_parking"
             android:textColor="@drawable/payment_btn_text_color_selector"
             android:textSize="16sp"
             android:textStyle="bold"
