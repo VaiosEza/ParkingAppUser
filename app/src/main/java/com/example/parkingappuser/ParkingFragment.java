@@ -48,6 +48,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     String [] minuteArray;
 
     private TextView costView , timerView;
+    private Button showMap , startParking;
 
     private double totalCost;
     private double costPerHour;
@@ -59,8 +60,6 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     private String userEmail;
     private double userBalance;
     private String locationName , freeStartTime , freeStopTime , freeDays;
-    private double hours;
-    private double minutes;
 
     private ActivityResultLauncher<Intent> mapLauncher;
 
@@ -92,8 +91,8 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         super.onViewCreated(view , savedInstanceState);
         hoursPicker = view.findViewById(R.id.hourPicker);
         minutesPicker = view.findViewById(R.id.minutePicker);
-        Button showMap = view.findViewById(R.id.chooseLocBtn);
-        Button startParking = view.findViewById(R.id.start_parking_button);
+        showMap = view.findViewById(R.id.chooseLocBtn);
+        startParking = view.findViewById(R.id.start_parking_button);
         costView = view.findViewById(R.id.textViewCost);
         timerView = view.findViewById(R.id.textViewTimer);
 
@@ -105,6 +104,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         minutesPicker.setMaxValue(minuteArray.length - 1);
         minutesPicker.setDisplayedValues(minuteArray);
 
+        timerView.setText("Timer: 00:00:00");
         startParking.setEnabled(false);
 
 
@@ -121,6 +121,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
                         freeStopTime = data.getStringExtra("freeStopTime");
                         freeDays = data.getStringExtra("freeDays");
 
+                        showMap.setText(locationName);
                         checkDateAndTime(startParking);
 
 
@@ -147,16 +148,18 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
                     if (startParking.getText().toString().equals(getString(R.string.start_parking))) {
                         timer.start();
                         startParking.setText(getString(R.string.stop_parking));
+                        showMap.setEnabled(false);
                     } else {
-                        timer.onFinish();
+                        timer.cancel();
                         startParking.setText(getString(R.string.start_parking));
+                        timerView.setText("Timer: 00:00:00");
+                        Toast.makeText(getContext(), "Πλήρωσες...", Toast.LENGTH_SHORT).show();
+                        showMap.setEnabled(true);
                     }
                 }
                 else{
                     Toast.makeText(getContext(), "Ανεπαρκές ποσό πληρωμής!", Toast.LENGTH_SHORT).show();
                 }
-//                System.out.println("Time in ms = "+timeInMs);
-
             }
         });
 
@@ -199,7 +202,11 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
             public void onFinish() {
                 timer.cancel();
                 timerView.setText("Timer: 00:00:00");
+                showMap.setEnabled(true);
+
             }
+
+
         };
 
 
