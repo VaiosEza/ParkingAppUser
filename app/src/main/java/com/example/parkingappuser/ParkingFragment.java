@@ -38,6 +38,8 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     private static  String ARG_EMAIL = "emailArg";
     private static  String ARG_BALANCE = "balanceArg";
 
+    private static  String ARG_LICENSE_PLATE = "licensePlateArg";
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -59,7 +61,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
 
     private String userEmail;
     private double userBalance;
-    private String locationName , freeStartTime , freeStopTime , freeDays;
+    private String locationName , freeStartTime , freeStopTime , freeDays , licensePlateNum;
 
     private ActivityResultLauncher<Intent> mapLauncher;
 
@@ -68,11 +70,12 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         // Required empty public constructor
     }
 
-    public static ParkingFragment newInstance(String email , double balance) {
+    public static ParkingFragment newInstance(String email , double balance, String licensePlate) {
         ParkingFragment fragment = new ParkingFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EMAIL, email);
         args.putDouble(ARG_BALANCE, balance);
+        args.putString(ARG_LICENSE_PLATE, licensePlate);
         fragment.setArguments(args);
 
         return fragment;
@@ -84,6 +87,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         if (getArguments() != null) {
             userEmail = getArguments().getString(ARG_EMAIL, null);
             userBalance = getArguments().getDouble(ARG_BALANCE,0.0);
+            licensePlateNum = getArguments().getString(ARG_LICENSE_PLATE, null);
         }
     }
 
@@ -106,8 +110,6 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
 
         timerView.setText("Timer: 00:00:00");
         startParking.setEnabled(false);
-
-
 
         mapLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -141,24 +143,39 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
         updateCost();
 
         showMap.setOnClickListener(v -> showMap());
+        PostData postObj = new PostData();
         startParking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (userBalance >= totalCost) {
-                    if (startParking.getText().toString().equals(getString(R.string.start_parking))) {
-                        timer.start();
-                        startParking.setText(getString(R.string.stop_parking));
-                        showMap.setEnabled(false);
+                if (!licensePlateNum.isEmpty()) {
+                    if (userBalance >= totalCost) {
+                        if (startParking.getText().toString().equals(getString(R.string.start_parking))) {
+                            timer.start();
+                            startParking.setText(getString(R.string.stop_parking));
+                            showMap.setEnabled(false);
+
+                            try {
+                                postObj.start_parking_session(getString(R.string.StartParkingSession_URL) ,userEmail ,locationName ,licensePlateNum);
+//                                System.out.println("Server response: "+msg);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+//                            System.out.println("email = "+userEmail);
+//                            System.out.println("location = "+locationName);
+//                            System.out.println("plate = "+licensePlateNum);
+                        } else {
+                            timer.cancel();
+                            startParking.setText(getString(R.string.start_parking));
+                            timerView.setText("Timer: 00:00:00");
+                            Toast.makeText(getContext(), "Πλήρωσες...", Toast.LENGTH_SHORT).show();
+                            showMap.setEnabled(true);
+                        }
                     } else {
-                        timer.cancel();
-                        startParking.setText(getString(R.string.start_parking));
-                        timerView.setText("Timer: 00:00:00");
-                        Toast.makeText(getContext(), "Πλήρωσες...", Toast.LENGTH_SHORT).show();
-                        showMap.setEnabled(true);
+                        Toast.makeText(getContext(), "Ανεπαρκές ποσό πληρωμής!", Toast.LENGTH_SHORT).show();
                     }
                 }
                 else{
-                    Toast.makeText(getContext(), "Ανεπαρκές ποσό πληρωμής!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Δεν όρισες αριθμό πινακίδας!", Toast.LENGTH_SHORT).show();
                 }
             }
         });

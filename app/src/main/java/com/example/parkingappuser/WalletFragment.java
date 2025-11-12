@@ -2,20 +2,19 @@ package com.example.parkingappuser;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.paymentsheet.PaymentSheet;
 import com.stripe.android.paymentsheet.PaymentSheetResult;
 
@@ -23,6 +22,7 @@ public class WalletFragment extends Fragment {
 
     private static  String ARG_EMAIL = "emailArg";
     private static  String ARG_BALANCE = "balanceArg";
+    private static  String ARG_LICENSE_PLATE = "licensePlateArg";
     private PaymentSheet paymentSheet;
     private String paymentIntentClientSecret;
     private RadioGroup radioGroup;
@@ -30,7 +30,7 @@ public class WalletFragment extends Fragment {
     private Button buttonPaySafePayPal;
     private Integer selectedAmount = null; // Το επιλεγμένο ποσό σε ΣΕΝΤΣ
 
-    private String userEmail;
+    private String userEmail , licensePlateNum;
     private Double userBalance;
 
     // 1. ΔΗΛΩΣΗ ΤΟΥ "ΣΥΜΒΟΛΑΙΟΥ" (INTERFACE)
@@ -45,11 +45,12 @@ public class WalletFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static WalletFragment newInstance(String email , double balance) {
+    public static WalletFragment newInstance(String email , double balance, String licensePlate) {
         WalletFragment fragment = new WalletFragment();
         Bundle args = new Bundle();
         args.putString(ARG_EMAIL, email);
         args.putDouble(ARG_BALANCE, balance);
+        args.putString(ARG_LICENSE_PLATE, licensePlate);
         fragment.setArguments(args);
 
         return fragment;
@@ -61,6 +62,7 @@ public class WalletFragment extends Fragment {
 
         userEmail = getArguments().getString(ARG_EMAIL, null);
         userBalance = getArguments().getDouble(ARG_BALANCE,0.0);
+        licensePlateNum = getArguments().getString(ARG_LICENSE_PLATE, null);
 
         // Αρχικοποίηση του PaymentSheet. Γίνεται μία φορά.
         paymentSheet = new PaymentSheet(this, this::onPaymentSheetResult);

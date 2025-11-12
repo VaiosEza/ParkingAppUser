@@ -59,6 +59,46 @@ public class PostData {
         return data +"#"+ status;
     }
 
+    String start_parking_session (String url , String email, String location , String license_plate) throws Exception {
+        String status="";
+        String data="";
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("user_email", email)
+                .add("location", location)
+                .add("license_plate", license_plate)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        try {
+            data = response.body().string();
+            JSONObject json = new JSONObject(data);
+            status = json.getString("status");
+
+            //System.out.println("Response body: " + data);
+
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+            status ="0";
+        }
+
+        if(status.equals("0")){
+            return "Server is down"+"#"+status;
+        }
+        //System.out.println("My status "+status);
+
+        return data +"#"+ status;
+    }
+
+
 
 
 }

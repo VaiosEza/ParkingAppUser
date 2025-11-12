@@ -2,6 +2,7 @@ package com.example.parkingappuser;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,9 @@ import com.stripe.android.PaymentConfiguration;
 public class UserActivity extends AppCompatActivity implements WalletFragment.OnBalanceUpdateListener {
     private int lastSelectedItemId = R.id.userPage;
     private TextView balanceView;
+    private EditText licensePlateView;
+
+    private String licensePlateNum;
     private double balance;
 
     @Override
@@ -32,6 +36,7 @@ public class UserActivity extends AppCompatActivity implements WalletFragment.On
         usernameView.setText(user.getName());
 
         balance = user.getBalance();
+        licensePlateView = findViewById(R.id.editTextLicensePlate);
         balanceView = findViewById(R.id.textViewBalance);
         balanceView.setText(String.valueOf(balance));
 
@@ -52,9 +57,9 @@ public class UserActivity extends AppCompatActivity implements WalletFragment.On
                 showActivityContent();
             } else {
                 if (newSelectedItemId == R.id.walletPage) {
-                    showFragment(WalletFragment.newInstance(user.getEmail(),balance), isGoingForward);
+                    showFragment(WalletFragment.newInstance(user.getEmail(),balance,licensePlateView.getText().toString()), isGoingForward);
                 } else if (newSelectedItemId == R.id.parkingPage) {
-                    showFragment(ParkingFragment.newInstance(user.getEmail(),balance), isGoingForward);
+                    showFragment(ParkingFragment.newInstance(user.getEmail(),balance,licensePlateView.getText().toString()), isGoingForward);
                 }
             }
             lastSelectedItemId = newSelectedItemId;
