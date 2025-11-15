@@ -34,12 +34,9 @@ public class WalletFragment extends Fragment {
     private Double userBalance;
 
     // 1. ΔΗΛΩΣΗ ΤΟΥ "ΣΥΜΒΟΛΑΙΟΥ" (INTERFACE)
-    public interface OnBalanceUpdateListener {
-        void onBalanceUpdated(double newBalance);
-    }
 
     // 2. ΔΗΜΙΟΥΡΓΙΑ ΜΙΑΣ ΜΕΤΑΒΛΗΤΗΣ ΓΙΑ ΤΟΝ "ΑΚΡΟΑΤΗ" (LISTENER)
-    private OnBalanceUpdateListener balanceUpdatelistener;
+    private BalanceUpdate balanceUpdatelistener;
 
     public WalletFragment() {
         // Required empty public constructor
@@ -215,8 +212,8 @@ public class WalletFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         // 3. ΕΛΕΓΧΟΣ ΚΑΙ ΑΝΑΘΕΣΗ ΤΟΥ LISTENER
-        if (context instanceof OnBalanceUpdateListener) {
-            balanceUpdatelistener = (OnBalanceUpdateListener) context;
+        if (context instanceof BalanceUpdate) {
+            balanceUpdatelistener = (BalanceUpdate) context;
         } else {
             // Αν η Activity δεν υλοποιεί το interface, "πέτα" ένα σφάλμα για να σε προειδοποιήσει
             throw new RuntimeException(context.toString()

@@ -2,10 +2,12 @@ package com.example.parkingappuser;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
@@ -28,7 +30,7 @@ import java.util.Locale;
  * Use the {@link ParkingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ParkingFragment extends Fragment implements WalletFragment.OnBalanceUpdateListener {
+public class ParkingFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -64,6 +66,8 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
     private String locationName , freeStartTime , freeStopTime , freeDays , licensePlateNum;
 
     private ActivityResultLauncher<Intent> mapLauncher;
+
+    private BalanceUpdate balanceUpdatelistener;
 
 
     public ParkingFragment() {
@@ -155,8 +159,8 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
                             showMap.setEnabled(false);
 
                             try {
-                                postObj.start_parking_session(getString(R.string.StartParkingSession_URL) ,userEmail ,locationName ,licensePlateNum);
-//                                System.out.println("Server response: "+msg);
+                                String msg = postObj.start_parking_session(getString(R.string.StartParkingSession_URL) ,userEmail ,locationName ,licensePlateNum);
+                                System.out.println("Server response: "+msg);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -164,11 +168,7 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
 //                            System.out.println("location = "+locationName);
 //                            System.out.println("plate = "+licensePlateNum);
                         } else {
-                            timer.cancel();
-                            startParking.setText(getString(R.string.start_parking));
-                            timerView.setText("Timer: 00:00:00");
-                            Toast.makeText(getContext(), "Πλήρωσες...", Toast.LENGTH_SHORT).show();
-                            showMap.setEnabled(true);
+                            parking_cost();
                         }
                     } else {
                         Toast.makeText(getContext(), "Ανεπαρκές ποσό πληρωμής!", Toast.LENGTH_SHORT).show();
@@ -220,6 +220,8 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
                 timer.cancel();
                 timerView.setText("Timer: 00:00:00");
                 showMap.setEnabled(true);
+                parking_cost();
+
 
             }
 
@@ -277,8 +279,67 @@ public class ParkingFragment extends Fragment implements WalletFragment.OnBalanc
 
     }
 
+    public void parking_cost() {
+        // Απενεργοποίησε το κουμπί για να μην πατηθεί ξανά
+        startParking.setEnabled(false);
+
+        new Thread(() -> {
+            try {
+                PostData postObj = new PostData();
+                String msg = postObj.stop_parking_session(getString(R.string.StopParkingSession_URL), userEmail);
+                String[] data = msg.split("#");
+
+                // Το status είναι το τρίτο στοιχείο (index 2)
+                String status = data[2];
+
+                // Όλη η ενημέρωση του UI πρέπει να γίνει στον main thread
+                getActivity().runOnUiThread(() -> {
+                    if ("Success".equalsIgnoreCase(status)) {
+                        double cost = Double.parseDouble(data[0]);
+                        double newBalance = Double.parseDouble(data[1]);
+
+                        timer.cancel();
+                        timerView.setText("Timer: 00:00:00");
+                        startParking.setText(getString(R.string.start_parking));
+
+                        Toast.makeText(getContext(), "Πλήρωσες " + String.format("%.2f€", cost), Toast.LENGTH_LONG).show();
+
+                        userBalance = newBalance;
+
+                        // 2. ΚΑΛΕΣΕ ΤΟΝ LISTENER ΓΙΑ ΝΑ ΕΝΗΜΕΡΩΣΕΙΣ ΤΗΝ ACTIVITY (Η ΔΙΟΡΘΩΣΗ!)
+                        if (balanceUpdatelistener != null) {
+                            balanceUpdatelistener.onBalanceUpdated(newBalance);
+                        }
+
+                        showMap.setEnabled(true);
+                    } else {
+                        // Χειρισμός σφάλματος
+                        String errorMessage = data[0]; // Το μήνυμα λάθους
+                        Toast.makeText(getContext(), "Σφάλμα: " + errorMessage, Toast.LENGTH_LONG).show();
+                        startParking.setEnabled(true);
+                    }
+                });
+            } catch (Exception e) {
+                // Χειρισμός σφάλματος δικτύου
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Σφάλμα δικτύου. Προσπαθήστε ξανά.", Toast.LENGTH_LONG).show();
+                    startParking.setEnabled(true);
+                });
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     @Override
-    public void onBalanceUpdated(double newBalance) {
-        userBalance = newBalance;
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // 3. ΕΛΕΓΧΟΣ ΚΑΙ ΑΝΑΘΕΣΗ ΤΟΥ LISTENER
+        if (context instanceof BalanceUpdate) {
+            balanceUpdatelistener = (BalanceUpdate) context;
+        } else {
+            // Αν η Activity δεν υλοποιεί το interface, "πέτα" ένα σφάλμα για να σε προειδοποιήσει
+            throw new RuntimeException(context.toString()
+                    + " must implement OnBalanceUpdateListener");
+        }
     }
 }

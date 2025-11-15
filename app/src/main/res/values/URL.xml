@@ -9,5 +9,6 @@
 <!--    <string name="CreatePaySafeCardIntent_URL">http://192.168.2.3/ParkingApp/create_paysafe_intent.php</string>-->
     <string name="UpdateBalance_URL">http://192.168.2.3/ParkingApp/update_balance.php</string>
     <string name="StartParkingSession_URL">http://192.168.2.3/ParkingApp/start_parking_session.php</string>
+    <string name="StopParkingSession_URL">http://192.168.2.3/ParkingApp/stop_parking_session.php</string>
 
 </resources>

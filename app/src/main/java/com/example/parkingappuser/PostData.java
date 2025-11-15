@@ -98,7 +98,50 @@ public class PostData {
         return data +"#"+ status;
     }
 
+    String stop_parking_session(String url, String email) throws Exception {
+        String status = "";
+        double totalCost = 0.0;
+        double newBalance = 0.0;
+        OkHttpClient client = new OkHttpClient();
 
+        RequestBody formBody = new FormBody.Builder()
+                .add("user_email", email)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        // 1. ΔΙΑΒΑΖΟΥΜΕ ΤΗΝ ΑΠΑΝΤΗΣΗ ΑΠΟ ΤΟΝ SERVER (Η ΓΡΑΜΜΗ ΠΟΥ ΕΛΕΙΠΕ)
+        String responseData = response.body().string();
+
+        try {
+            // 2. ΔΗΜΙΟΥΡΓΟΥΜΕ ΤΟ JSON OBJECT ΑΠΟ ΤΗΝ ΑΠΑΝΤΗΣΗ
+            JSONObject json = new JSONObject(responseData);
+            status = json.optString("status", "Failure"); // optString είναι πιο ασφαλές
+
+            if ("Success".equalsIgnoreCase(status)) {
+                // 3. ΔΙΑΒΑΖΟΥΜΕ ΤΙΣ ΤΙΜΕΣ ΑΠΕΥΘΕΙΑΣ ΑΠΟ ΤΟ ΚΥΡΙΟ OBJECT
+                // Δεν υπάρχει "data" object μέσα στην απάντηση
+                totalCost = json.getDouble("totalCost");
+                newBalance = json.getDouble("newBalance");
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            status = "0";
+        }
+
+        if (!"Success".equalsIgnoreCase(status)) {
+            return "Server Error#0#0"; // Επιστρέφουμε default τιμές σε περίπτωση σφάλματος
+        }
+
+        // Επιστρέφουμε τις τιμές με το format που θέλετε
+        return totalCost + "#" + newBalance + "#" + status;
+    }
 
 
 }

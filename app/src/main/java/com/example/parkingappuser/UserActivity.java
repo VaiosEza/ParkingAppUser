@@ -12,7 +12,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.stripe.android.PaymentConfiguration;
 
 
-public class UserActivity extends AppCompatActivity implements WalletFragment.OnBalanceUpdateListener {
+public class UserActivity extends AppCompatActivity implements BalanceUpdate {
     private int lastSelectedItemId = R.id.userPage;
     private TextView balanceView;
     private EditText licensePlateView;
@@ -100,7 +100,9 @@ public class UserActivity extends AppCompatActivity implements WalletFragment.On
 
     @Override
     public void onBalanceUpdated(double newBalance) {
-        balanceView.setText(String.valueOf(newBalance));
+        balanceView.setText(String.format("%.2f",newBalance));
+
         balance = newBalance;
     }
+
 }
