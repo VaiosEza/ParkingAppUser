@@ -198,7 +198,7 @@ public class ParkingFragment extends Fragment {
         // Βρίσκουμε την πραγματική τιμή των λεπτών
         selectedMinutes = Integer.parseInt(minuteArray[selectedMinuteIndex]);
 
-        if(selectedMinutes>0){
+        if(selectedMinutes<=0){
             timeInMs = (selectedHours * 3600000);
 
         }
